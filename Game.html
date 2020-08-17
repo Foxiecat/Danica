@@ -9,6 +9,7 @@
         </style>
     </head>
     <body>
+        <h1>Dani Crossing</h1>
         <canvas id="myCanvas" width="1000" height="500"></canvas>
 
         <script type="text/javascript">
@@ -17,11 +18,14 @@
          var canvas = document.getElementById("myCanvas");
          var ctx = canvas.getContext('2d');
 
-         let screenWidth = 1000;
-         let screenHeight = 500;
-         let width = 50;
-         let height = 50;
+         const screenWidth = 1000;
+         const screenHeight = 500;
+         const width = 30;
+         const height = 30;
          var isGameLive = true;
+
+         var isRightKeyPressed = false;
+         var isLeftKeyPressed = false;
 
 
          // Controller
@@ -58,32 +62,66 @@
          ];
 
          // Goal
-         var goal = new GameCharacter(screenWidth - width, 200, width, 100, "rgb(0, 0, 0)", 5);
+         var goal = new GameCharacter(screenWidth - 50, 200, width, 100, "rgb(0, 0, 0)");
 
          // Player
-         var player = new GameCharacter(50, 225, width, width, "rgb(0, 255, 0)", 0);
+         var player = new GameCharacter(50, 200, width, width, "rgb(0, 255, 0)", 0);
+
+         // Sprites
+         var sprites = {};
+         var loadSprites = function()
+         {
+             sprites.player = new Image();
+             sprites.player.src = "images/hero.png";
+
+             sprites.background = new Image();
+             sprites.background.src = "images/floor.png";
+
+             sprites.enemy = new Image();
+             sprites.enemy.src = "images/enemy.png";
+
+             sprites.goal = new Image();
+             sprites.goal.src = "images/chest.png";
+         }
          
          // Player controls
          document.onkeydown = function(event){
-             let keyPressed = event.keyCode;
-
+            let keyPressed = event.keyCode;
+            
              if (keyPressed == 68) {
                  player.speed = player.maxSpeed;
+                 isRightKeyPressed = true;
              }
              if (keyPressed == 65) {
                  player.speed = -player.maxSpeed;
+                 isLeftKeyPressed = true;
              }
          }
 
          document.onkeyup = function(event){
-            player.speed = 0;
+             let keyUp = event.keyCode;
+             if(keyUp == 68)
+             {
+                 isRightKeyPressed = false;
+                 if(isLeftKeyPressed)
+                 {
+                     player.speed = -player.maxSpeed;
+                 } else { player.speed = 0; }
+             } else if (keyUp == 65)
+               {
+                 isLeftKeyPressed = false;
+                 if(isRightKeyPressed)
+                 {
+                     player.speed = player.maxSpeed;
+                 } else { player.speed = 0; }
+               }
          }
 
 
          // Collision detection
          var checkCollisions = function(rect1, rect2){
-             var xOverlap = Math.abs(rect1.x - rect2.x) <= Math.max(rect1.width, rect2.width);
-             var yOverlap = Math.abs(rect1.y - rect2.y) <= Math.max(rect1.height, rect2.height);
+             let xOverlap = Math.abs(rect1.x - rect2.x) <= Math.max(rect1.width, rect2.width);
+             let yOverlap = Math.abs(rect1.y - rect2.y) <= Math.max(rect1.height, rect2.height);
              return xOverlap && yOverlap;
          }
 
@@ -91,17 +129,20 @@
          var draw = function(){
              ctx.clearRect(0,0, screenWidth, screenHeight);
 
-             ctx.fillStyle = player.color;
-             ctx.fillRect(player.x, player.y, player.width, player.height);
+             //Drawing the background sprite
+             ctx.drawImage(sprites.background, 0, 0);
 
-            enemies.forEach(function(element)
+             //Drawing the player sprite
+             ctx.drawImage(sprites.player, player.x, player.y);
+
+            //Drawing the goal
+             ctx.drawImage(sprites.goal, goal.x, goal.y);
+
+            //Drawing the enemy sprites
+             enemies.forEach(function(element)
             {
-                ctx.fillStyle = element.color;
-                ctx.fillRect(element.x, element.y, element.width, element.height);
+                ctx.drawImage(sprites.enemy, element.x, element.y);
             });
-
-            ctx.fillStyle = goal.color;
-             ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
         }
 
 
@@ -142,6 +183,7 @@
                 window.requestAnimationFrame(step);
              }
          }
+         loadSprites();
          step();
         </script>
 
