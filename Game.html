@@ -21,6 +21,7 @@
          let screenHeight = 500;
          let width = 50;
          let height = 50;
+         var isGameLive = true;
 
 
          // Controller
@@ -56,6 +57,8 @@
              new GameCharacter(700, 50, width, width, "rgb(255, 0, 0)", 4)
          ];
 
+         // Goal
+         var goal = new GameCharacter(screenWidth - width, 200, width, 100, "rgb(0, 0, 0)", 5);
 
          // Player
          var player = new GameCharacter(50, 225, width, width, "rgb(0, 255, 0)", 0);
@@ -96,29 +99,48 @@
                 ctx.fillStyle = element.color;
                 ctx.fillRect(element.x, element.y, element.width, element.height);
             });
-         }
+
+            ctx.fillStyle = goal.color;
+             ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
+        }
 
 
          // Update Movement
          var update = function() {
-            player.moveHorizontally();
+             player.moveHorizontally();
 
-            enemies.forEach(function(element){
+             if(checkCollisions(player, goal))
+                {
+                    endGameLogic("You Win");
+                }
+
+             enemies.forEach(function(element)
+             {
                 if(checkCollisions(player, element))
                 {
-                    alert("Collision Detected");
+                    endGameLogic("You Lost");
                 }
 
                 element.moveVertically();
              });
          }
 
+         // The logic for how the game ends
+         var endGameLogic = function(text)
+         {
+             isGameLive = false;
+            alert(text);
+            window.location = "";
+         }
 
          //view
          var step = function() {
              update();
              draw();
-             window.requestAnimationFrame(step);
+             if (isGameLive)
+             {
+                window.requestAnimationFrame(step);
+             }
          }
          step();
         </script>
